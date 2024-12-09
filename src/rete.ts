@@ -10,60 +10,54 @@ type Schemes = GetSchemes<
 	ClassicPreset.Node,
 	ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>
 >;
+
 type AreaExtra = VueArea2D<Schemes>;
 
 export async function createEditor(container: HTMLElement) {
-	const socket = new ClassicPreset.Socket("socket");
-
 	// for managing nodes and connections
 	const editor = new NodeEditor<Schemes>();
+
+	const socket = new ClassicPreset.Socket("socket");
 
 	// for displaying the viewport that the user can
 	// drag, zoom, and drag other elements such as nodes within it
 	const area = new AreaPlugin<Schemes, AreaExtra>(container);
 
-	// for the user's interaction with connections
-	const connection = new ConnectionPlugin<Schemes, AreaExtra>();
-
-	// for rendering nodes, connections and
+	// for rendering nodes, connections, and
 	// other built-in components of the framework
 	const render = new VuePlugin<Schemes, AreaExtra>();
+	render.addPreset(Presets.classic.setup());
 
+	editor.use(area);
+	area.use(render);
+
+	const nodeA = new ClassicPreset.Node("a");
+	nodeA.addControl("a", new ClassicPreset.InputControl("text", {}));
+	nodeA.addOutput("a", new ClassicPreset.Output(socket));
+	await editor.addNode(nodeA);
+
+	const nodeB = new ClassicPreset.Node("b");
+	nodeB.addControl("b", new ClassicPreset.InputControl("text", {}));
+	nodeB.addInput("b", new ClassicPreset.Input(socket));
+	await editor.addNode(nodeB);
+
+	await editor.addConnection(
+		new ClassicPreset.Connection(nodeA, "a", nodeB, "b"),
+	);
+
+	await area.translate(nodeB.id, { x: 270, y: 0 });
+
+	// for the user's interaction with connections
+	const connection = new ConnectionPlugin<Schemes, AreaExtra>();
+	connection.addPreset(ConnectionPresets.classic.setup());
+
+	area.use(connection);
+
+	AreaExtensions.zoomAt(area, editor.getNodes());
 	AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
 		accumulating: AreaExtensions.accumulateOnCtrl(),
 	});
-
-	render.addPreset(Presets.classic.setup());
-
-	connection.addPreset(ConnectionPresets.classic.setup());
-
-	editor.use(area);
-	area.use(connection);
-	area.use(render);
-
 	AreaExtensions.simpleNodesOrder(area);
-
-	const a = new ClassicPreset.Node("A");
-	a.addControl(
-		"a",
-		new ClassicPreset.InputControl("text", { initial: "hello" }),
-	);
-	a.addOutput("a", new ClassicPreset.Output(socket));
-	await editor.addNode(a);
-
-	const b = new ClassicPreset.Node("B");
-	b.addControl(
-		"b",
-		new ClassicPreset.InputControl("text", { initial: "hello" }),
-	);
-	b.addInput("b", new ClassicPreset.Input(socket));
-	await editor.addNode(b);
-
-	await area.translate(b.id, { x: 320, y: 0 });
-
-	await editor.addConnection(new ClassicPreset.Connection(a, "a", b, "b"));
-
-	AreaExtensions.zoomAt(area, editor.getNodes());
 
 	return () => area.destroy();
 }
