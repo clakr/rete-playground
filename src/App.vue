@@ -58,15 +58,41 @@ async function handleClearNodes() {
   await editor.value?.clear()
 }
 
-async function handleSaveNodes() {}
+async function handleSaveNodes() {
+  const content = JSON.stringify(editor.value, null, 2)
+  const fileName = 'editor.json'
+
+  const blob = new Blob([content], { type: 'text/json' })
+  const link = document.createElement('a')
+
+  link.download = fileName
+  link.href = window.URL.createObjectURL(blob)
+  link.dataset.downloadurl = ['text/json', link.download, link.href].join(':')
+
+  const evt = new MouseEvent('click', {
+    view: window,
+    bubbles: true,
+    cancelable: true,
+  })
+
+  link.dispatchEvent(evt)
+  link.remove()
+}
 </script>
 
 <template>
   <main class="grid h-svh auto-cols-fr grid-flow-col gap-x-4 p-4">
     <div ref="rete" class="border" />
     <div
-      class="grid max-h-[calc(100svh-theme(spacing.8))] grid-cols-2 grid-rows-2 gap-4 *:border *:p-4"
+      class="grid max-h-[calc(100svh-theme(spacing.8))] grid-cols-3 grid-rows-2 gap-4 *:border *:p-4"
     >
+      <section class="relative overflow-auto">
+        <Button type="button" class="absolute right-2 top-2 border" @click="handleCopy(editor)">
+          copy
+        </Button>
+        <h2 class="font-medium">`editor`</h2>
+        <pre class="text-xs">{{ editor }}</pre>
+      </section>
       <section class="relative overflow-auto">
         <Button
           type="button"
