@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { onMounted, useTemplateRef } from 'vue';
-import { createEditor } from './rete';
+import { onMounted, useTemplateRef } from "vue";
+import { createEditor } from "./rete";
 
-const reteRef = useTemplateRef('rete')
+const reteRef = useTemplateRef("rete");
 
 onMounted(() => {
-  if(!reteRef.value) return
+	if (!reteRef.value) return;
 
-  createEditor(reteRef.value)
-})
-
+	createEditor(reteRef.value);
+});
 </script>
 
 <template>
@@ -22,6 +21,7 @@ body {
 }
 
 main {
-  min-height: 100svh;
+  min-height: 50svh;
+  border: 1px solid black;
 }
 </style>
