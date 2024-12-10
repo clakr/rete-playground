@@ -49,8 +49,16 @@ onUnmounted(() => {
   area.value.destroy()
 })
 
-async function handleAddNode({ ...opts }: { hasInput?: boolean; hasOutput?: boolean }) {
-  const node = new Node({ ...opts })
+async function handleAddNode({ hasInput, hasOutput }: { hasInput?: boolean; hasOutput?: boolean }) {
+  let label = ''
+  if (hasInput && hasOutput) {
+    label = 'this is a node with both input and output'
+  } else if (hasInput) {
+    label = 'this is a node with input'
+  } else if (hasOutput) {
+    label = 'this is a node with output'
+  }
+  const node = new Node({ label, hasInput, hasOutput })
   await editor.value?.addNode(node)
 }
 
@@ -116,13 +124,15 @@ async function handleSaveNodes() {
         <pre class="text-xs">{{ editor?.getConnections() }}</pre>
       </section>
       <section class="col-span-2 flex flex-wrap items-start gap-4">
-        <Button type="button" @click="handleAddNode({ hasInput: false })">
+        <Button type="button" @click="handleAddNode({ hasOutput: true })">
           create node with output
         </Button>
-        <Button type="button" @click="handleAddNode({ hasOutput: false })">
+        <Button type="button" @click="handleAddNode({ hasInput: true })">
           create node with input
         </Button>
-        <Button type="button" @click="handleAddNode"> create node with input and output </Button>
+        <Button type="button" @click="handleAddNode({ hasInput: true, hasOutput: true })">
+          create node with input and output
+        </Button>
         <Button type="button" @click="handleClearNodes">clear nodes</Button>
         <Button type="button" @click="handleSaveNodes">save nodes</Button>
       </section>
