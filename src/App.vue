@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import Button from './components/button.vue'
+import { handleCopy } from './utils'
+import { Node } from './utils/rete'
 import { NodeEditor, GetSchemes, ClassicPreset } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
@@ -18,8 +21,6 @@ const editor = ref<NodeEditor<Schemes>>()
 const area = ref<AreaPlugin<Schemes, AreaExtra>>()
 
 onMounted(async () => {
-  const socket = new ClassicPreset.Socket('socket')
-
   editor.value = new NodeEditor<Schemes>()
   area.value = new AreaPlugin<Schemes, AreaExtra>(reteRef.value!)
   const connection = new ConnectionPlugin<Schemes, AreaExtra>()
@@ -39,23 +40,6 @@ onMounted(async () => {
 
   AreaExtensions.simpleNodesOrder(area.value)
 
-  const a = new ClassicPreset.Node('A')
-  a.addOutput('a', new ClassicPreset.Output(socket))
-  await editor.value.addNode(a)
-
-  const b = new ClassicPreset.Node('B')
-  b.addInput('b', new ClassicPreset.Input(socket))
-  await editor.value.addNode(b)
-
-  const c = new ClassicPreset.Node('C')
-  c.addInput('c', new ClassicPreset.Input(socket))
-  await editor.value.addNode(c)
-
-  await area.value.translate(b.id, { x: 320, y: -160 })
-  await area.value.translate(c.id, { x: 320, y: 160 })
-
-  await editor.value.addConnection(new ClassicPreset.Connection(a, 'a', b, 'b'))
-
   AreaExtensions.zoomAt(area.value, editor.value.getNodes())
 })
 
@@ -65,8 +49,9 @@ onUnmounted(() => {
   area.value.destroy()
 })
 
-async function handleCopy(input: any) {
-  await navigator.clipboard.writeText(JSON.stringify(input))
+async function handleAddNode() {
+  const node = new Node(crypto.randomUUID())
+  await editor.value?.addNode(node)
 }
 </script>
 
@@ -77,28 +62,30 @@ async function handleCopy(input: any) {
       class="grid max-h-[calc(100svh-theme(spacing.8))] grid-cols-2 grid-rows-2 gap-4 *:border *:p-4"
     >
       <section class="relative overflow-auto">
-        <button
+        <Button
           type="button"
           class="absolute right-2 top-2 border"
           @click="handleCopy(editor?.getNodes())"
         >
-          Copy
-        </button>
+          copy
+        </Button>
         <h2 class="font-medium">`editor.getNodes()`</h2>
         <pre class="text-xs">{{ editor?.getNodes() }}</pre>
       </section>
       <section class="relative overflow-auto">
-        <button
+        <Button
           type="button"
           class="absolute right-2 top-2 border"
           @click="handleCopy(editor?.getConnections())"
         >
-          Copy
-        </button>
+          copy
+        </Button>
         <h2 class="font-medium">`editor.getConnections()`</h2>
         <pre class="text-xs">{{ editor?.getConnections() }}</pre>
       </section>
-      <section class="col-span-2">qwe</section>
+      <section class="col-span-2">
+        <Button type="button" @click="handleAddNode">create node</Button>
+      </section>
     </div>
   </main>
 </template>
