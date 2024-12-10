@@ -15,10 +15,12 @@ export class Node extends ClassicPreset.Node {
     super(label)
 
     if (hasInput) {
-      this.addInput('input', new ClassicPreset.Input(socket))
+      this.addInput('input_foo', new ClassicPreset.Input(socket))
+      this.addInput('input_bar', new ClassicPreset.Input(socket))
     }
     if (hasOutput) {
-      this.addOutput('output', new ClassicPreset.Output(socket))
+      this.addOutput('output_foo', new ClassicPreset.Output(socket))
+      this.addOutput('output_bar', new ClassicPreset.Output(socket))
     }
   }
 }
