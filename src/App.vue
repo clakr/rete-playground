@@ -49,10 +49,16 @@ onUnmounted(() => {
   area.value.destroy()
 })
 
-async function handleAddNode() {
-  const node = new Node(crypto.randomUUID())
+async function handleAddNode({ ...opts }: { hasInput?: boolean; hasOutput?: boolean }) {
+  const node = new Node({ ...opts })
   await editor.value?.addNode(node)
 }
+
+async function handleClearNodes() {
+  await editor.value?.clear()
+}
+
+async function handleSaveNodes() {}
 </script>
 
 <template>
@@ -83,8 +89,16 @@ async function handleAddNode() {
         <h2 class="font-medium">`editor.getConnections()`</h2>
         <pre class="text-xs">{{ editor?.getConnections() }}</pre>
       </section>
-      <section class="col-span-2">
-        <Button type="button" @click="handleAddNode">create node</Button>
+      <section class="col-span-2 flex flex-wrap items-start gap-4">
+        <Button type="button" @click="handleAddNode({ hasInput: false })">
+          create node with output
+        </Button>
+        <Button type="button" @click="handleAddNode({ hasOutput: false })">
+          create node with input
+        </Button>
+        <Button type="button" @click="handleAddNode"> create node with input and output </Button>
+        <Button type="button" @click="handleClearNodes">clear nodes</Button>
+        <Button type="button" @click="handleSaveNodes">save nodes</Button>
       </section>
     </div>
   </main>
