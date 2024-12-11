@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Button from './components/button.vue'
+import Reference from './components/nodes/reference.vue'
 import { handleCopy } from './utils'
-import { Node } from './utils/rete'
+import { Node, ReferenceNode } from './utils/rete'
 import { NodeEditor, GetSchemes, ClassicPreset } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
@@ -10,7 +11,7 @@ import { onMounted, onUnmounted, ref, useTemplateRef } from 'vue'
 
 const reteRef = useTemplateRef('rete')
 
-type Schemes = GetSchemes<
+export type Schemes = GetSchemes<
   ClassicPreset.Node,
   ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>
 >
@@ -36,7 +37,19 @@ onMounted(async () => {
   })
 
   // https://retejs.org/docs/guides/basic#crate-area
-  render.addPreset(Presets.classic.setup())
+  render.addPreset(
+    Presets.classic.setup({
+      customize: {
+        node(data) {
+          if (data.payload.label === 'reference') {
+            return Reference
+          }
+
+          return Presets.classic.Node
+        },
+      },
+    }),
+  )
 
   // https://retejs.org/docs/guides/basic#interactive-connections
   connection.addPreset(ConnectionPresets.classic.setup())
@@ -50,6 +63,10 @@ onMounted(async () => {
 
   // https://retejs.org/docs/guides/basic#fit-viewport
   AreaExtensions.zoomAt(area.value, editor.value.getNodes())
+
+  // --- everything below is unnecessary for setting up rete
+  const referenceNode = new ReferenceNode()
+  editor.value.addNode(referenceNode)
 })
 
 onUnmounted(() => {

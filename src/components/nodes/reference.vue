@@ -1,0 +1,48 @@
+<script setup lang="ts">
+import { Schemes } from '../../App.vue'
+import { sortByIndex } from '../../utils'
+import { Icon } from '@iconify/vue'
+import { Ref } from 'rete-vue-plugin'
+import { computed } from 'vue'
+
+// emit:any cos idk emit type, can't find in rete.js
+const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
+
+const outputs = computed(() => sortByIndex(Object.entries(props.data.outputs)))
+</script>
+
+<template>
+  <article
+    class="relative flex aspect-video w-64 flex-col justify-between rounded-lg border bg-slate-50 text-sm hover:bg-slate-300 data-[selected=true]:bg-slate-600 data-[selected=true]:text-slate-50"
+    :data-selected="data.selected"
+  >
+    <div class="grid place-content-center py-8">
+      <Icon icon="formkit:start" class="size-20" />
+    </div>
+
+    <!-- outputs -->
+    <section class="border-t py-2 text-xs font-medium">
+      <template v-for="[key, output] in outputs" :key="key + seed">
+        <div v-if="output" class="flex items-center justify-end gap-x-4">
+          <div v-if="output.label">
+            {{ output.label }}
+          </div>
+          <Ref
+            :emit
+            :data="{ type: 'socket', side: 'output', key, nodeId: data.id, payload: output.socket }"
+            data-testid="output-socket"
+            class="-mx-4 [&>div[title=socket]]:bg-slate-700"
+          />
+        </div>
+      </template>
+    </section>
+
+    <!-- node label -->
+    <div
+      class="absolute inset-x-0 top-[calc(100%+1rem)] flex items-center justify-center gap-x-2 font-semibold capitalize [[data-selected=true]_&]:text-slate-950"
+    >
+      <Icon icon="formkit:start" />
+      {{ data.label }}
+    </div>
+  </article>
+</template>
