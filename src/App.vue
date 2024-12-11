@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import Button from './components/button.vue'
+import Textarea from './components/control/textarea.vue'
 import Reference from './components/nodes/reference.vue'
+import Text from './components/nodes/text.vue'
 import { handleCopy } from './utils'
-import { Node, ReferenceNode } from './utils/rete'
+import { ReferenceNode, TextareaControl, TextNode } from './utils/rete'
 import { NodeEditor, GetSchemes, ClassicPreset } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
@@ -43,9 +45,18 @@ onMounted(async () => {
         node(data) {
           if (data.payload.label === 'reference') {
             return Reference
+          } else if (data.payload.label === 'text') {
+            return Text
           }
 
           return Presets.classic.Node
+        },
+        control(data) {
+          if (data.payload instanceof TextareaControl) {
+            return Textarea
+          } else if (data.payload instanceof ClassicPreset.InputControl) {
+            return Presets.classic.Control
+          }
         },
       },
     }),
@@ -61,12 +72,16 @@ onMounted(async () => {
   // https://retejs.org/docs/guides/basic#nodes-order
   AreaExtensions.simpleNodesOrder(area.value)
 
-  // https://retejs.org/docs/guides/basic#fit-viewport
-  AreaExtensions.zoomAt(area.value, editor.value.getNodes())
-
   // --- everything below is unnecessary for setting up rete
   const referenceNode = new ReferenceNode()
-  editor.value.addNode(referenceNode)
+  await editor.value.addNode(referenceNode)
+
+  const textNode = new TextNode()
+  await editor.value.addNode(textNode)
+  await area.value.translate(textNode.id, { x: 400, y: 0 })
+
+  // https://retejs.org/docs/guides/basic#fit-viewport
+  AreaExtensions.zoomAt(area.value, editor.value.getNodes())
 })
 
 onUnmounted(() => {
@@ -74,21 +89,6 @@ onUnmounted(() => {
 
   area.value.destroy()
 })
-
-async function handleAddNode({ hasInput, hasOutput }: { hasInput?: boolean; hasOutput?: boolean }) {
-  let label = ''
-  if (hasInput && hasOutput) {
-    label = 'this is a node with both input and output'
-  } else if (hasInput) {
-    label = 'this is a node with input'
-  } else if (hasOutput) {
-    label = 'this is a node with output'
-  }
-
-  // `Node` is custom/extended through `ClassicPreset.Node`
-  const node = new Node({ label, hasInput, hasOutput })
-  await editor.value?.addNode(node)
-}
 
 async function handleClearNodes() {
   await editor.value?.clear()
@@ -152,7 +152,7 @@ async function handleUploadData(event: Event) {
   // `editor.addNode` is asynchronous
   await Promise.allSettled(
     content.nodes.map(async (node) => {
-      const newNode = new Node({ label: node.label })
+      const newNode = new ClassicPreset.Node(node.label)
       newNode.id = node.id
 
       // iterate through node's input sockets and create accordingly
@@ -215,15 +215,6 @@ async function handleUploadData(event: Event) {
         <pre class="text-xs">{{ area }}</pre>
       </section>
       <section class="col-span-full flex flex-wrap items-start gap-4">
-        <Button type="button" @click="handleAddNode({ hasOutput: true })">
-          create node with output
-        </Button>
-        <Button type="button" @click="handleAddNode({ hasInput: true })">
-          create node with input
-        </Button>
-        <Button type="button" @click="handleAddNode({ hasInput: true, hasOutput: true })">
-          create node with input and output
-        </Button>
         <Button type="button" @click="handleClearNodes">clear nodes</Button>
         <Button type="button" @click="handleSaveNodes">save nodes</Button>
         <input type="file" @change="handleUploadData" />

@@ -10,23 +10,30 @@ export class ReferenceNode extends ClassicPreset.Node {
   }
 }
 
-export class Node extends ClassicPreset.Node {
-  constructor({
-    label,
-    hasInput = false,
-    hasOutput = false,
-  }: {
-    label: string
-    hasInput?: boolean
-    hasOutput?: boolean
-  }) {
-    super(label)
+export class TextNode extends ClassicPreset.Node {
+  constructor() {
+    super('text')
 
-    if (hasInput) {
-      this.addInput('input', new ClassicPreset.Input(socket, 'label?', true))
-    }
-    if (hasOutput) {
-      this.addOutput('output', new ClassicPreset.Output(socket))
-    }
+    this.addInput('input', new ClassicPreset.Input(socket, 'From Step / Triggers'))
+    this.addOutput('output', new ClassicPreset.Output(socket, 'Continue to Next Step'))
+    this.addControl(
+      'control',
+      new TextareaControl('edit me plz', (event) => {
+        const textarea = this.controls['control']
+        if (textarea && textarea instanceof TextareaControl) {
+          const { value } = event.target as HTMLTextAreaElement
+          textarea.value = value
+        }
+      }),
+    )
+  }
+}
+
+export class TextareaControl extends ClassicPreset.Control {
+  constructor(
+    public value: string,
+    public onChange: (event: Event) => void,
+  ) {
+    super()
   }
 }

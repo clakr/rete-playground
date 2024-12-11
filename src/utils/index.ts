@@ -1,11 +1,11 @@
-import { Input, Output, Socket } from 'rete/_types/presets/classic'
+import { Control, Input, Output, Socket } from 'rete/_types/presets/classic'
 
 export async function handleCopy(input: any) {
   await navigator.clipboard.writeText(JSON.stringify(input))
 }
 
-export function sortByIndex(
-  entries: Array<[string, Output<Socket> | undefined]> | Array<[string, Input<Socket> | undefined]>,
+export function sortByIndex<T extends Output<Socket> | Input<Socket> | Control>(
+  entries: Array<[string, T | undefined]>,
 ) {
   if (!entries) throw new Error('no entries')
 

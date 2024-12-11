@@ -15,6 +15,7 @@ const outputs = computed(() => sortByIndex(Object.entries(props.data.outputs)))
   <article
     class="relative flex aspect-video w-64 flex-col justify-between rounded-lg border bg-slate-50 text-sm hover:bg-slate-300 data-[selected=true]:bg-slate-600 data-[selected=true]:text-slate-50"
     :data-selected="data.selected"
+    data-testid="node"
   >
     <div class="grid place-content-center py-8">
       <Icon icon="formkit:start" class="size-20" />
@@ -23,7 +24,11 @@ const outputs = computed(() => sortByIndex(Object.entries(props.data.outputs)))
     <!-- outputs -->
     <section class="border-t py-2 text-xs font-medium">
       <template v-for="[key, output] in outputs" :key="key + seed">
-        <div v-if="output" class="flex items-center justify-end gap-x-4">
+        <div
+          v-if="output"
+          :data-testid="`output-${key}`"
+          class="flex items-center justify-end gap-x-4"
+        >
           <div v-if="output.label">
             {{ output.label }}
           </div>
