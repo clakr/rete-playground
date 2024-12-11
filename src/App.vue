@@ -78,11 +78,23 @@ async function handleClearNodes() {
 }
 
 async function handleSaveNodes() {
+  if (!editor.value) return
   // https://stackoverflow.com/a/65939108
   // code snippet to write contents to a file and
   // automatically download file, without having to
   // use `node:fs`
-  const content = JSON.stringify(editor.value, null, 2)
+  const content = JSON.stringify(
+    {
+      nodes: editor.value.getNodes().map((node) => ({
+        ...node,
+        position: area.value?.nodeViews.get(node.id)?.position,
+      })),
+      connections: editor.value.getConnections(),
+    },
+    null,
+    2,
+  )
+
   const fileName = 'editor.json'
 
   const blob = new Blob([content], { type: 'text/json' })
@@ -111,6 +123,9 @@ async function handleUploadData(event: Event) {
   const file = inputElement.files?.item(0)
   if (!file) throw new Error('no file selected')
 
+  // reset `<input />` value
+  inputElement.value = ''
+
   // get and parse content to JSON
   const content = JSON.parse(await file.text())
 
@@ -134,6 +149,7 @@ async function handleUploadData(event: Event) {
       }
 
       await editor.value?.addNode(newNode)
+      await area.value?.translate(newNode.id, node.position)
     }),
   )
 
@@ -165,7 +181,7 @@ async function handleUploadData(event: Event) {
   <main class="grid h-svh auto-cols-fr grid-flow-col gap-x-4 p-4">
     <div ref="rete" class="border" />
     <div
-      class="grid max-h-[calc(100svh-theme(spacing.8))] grid-cols-3 grid-rows-2 gap-4 *:border *:p-4"
+      class="grid max-h-[calc(100svh-theme(spacing.8))] grid-cols-2 grid-rows-2 gap-4 *:border *:p-4"
     >
       <section class="relative overflow-auto">
         <Button type="button" class="absolute right-2 top-2 border" @click="handleCopy(editor)">
@@ -175,26 +191,11 @@ async function handleUploadData(event: Event) {
         <pre class="text-xs">{{ editor }}</pre>
       </section>
       <section class="relative overflow-auto">
-        <Button
-          type="button"
-          class="absolute right-2 top-2 border"
-          @click="handleCopy(editor?.getNodes())"
-        >
+        <Button type="button" class="absolute right-2 top-2 border" @click="handleCopy(area)">
           copy
         </Button>
-        <h2 class="font-medium">`editor.getNodes()`</h2>
-        <pre class="text-xs">{{ editor?.getNodes() }}</pre>
-      </section>
-      <section class="relative overflow-auto">
-        <Button
-          type="button"
-          class="absolute right-2 top-2 border"
-          @click="handleCopy(editor?.getConnections())"
-        >
-          copy
-        </Button>
-        <h2 class="font-medium">`editor.getConnections()`</h2>
-        <pre class="text-xs">{{ editor?.getConnections() }}</pre>
+        <h2 class="font-medium">`area`</h2>
+        <pre class="text-xs">{{ area }}</pre>
       </section>
       <section class="col-span-full flex flex-wrap items-start gap-4">
         <Button type="button" @click="handleAddNode({ hasOutput: true })">
