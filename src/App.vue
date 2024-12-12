@@ -132,65 +132,55 @@ async function handleSaveNodes() {
 }
 
 async function handleUploadData(event: Event) {
-  // clear canvas' nodes
-  editor.value?.clear()
-
-  // get file from `input:file`
-  const inputElement = event.target as HTMLInputElement
-  const file = inputElement.files?.item(0)
-  if (!file) throw new Error('no file selected')
-
-  // reset `<input />` value
-  inputElement.value = ''
-
-  // get and parse content to JSON
-  const content = JSON.parse(await file.text())
-
-  // iterate each node and its respective details
-  // and add node into canvas
-  // should be wrapped in `Promise.allSettled` since
-  // `editor.addNode` is asynchronous
-  await Promise.allSettled(
-    content.nodes.map(async (node) => {
-      const newNode = new ClassicPreset.Node(node.label)
-      newNode.id = node.id
-
-      // iterate through node's input sockets and create accordingly
-      for (const input in node.inputs) {
-        newNode.addInput(input, new ClassicPreset.Input(socket))
-      }
-
-      // iterate through node's output sockets and create accordingly
-      for (const output in node.outputs) {
-        newNode.addOutput(output, new ClassicPreset.Output(socket))
-      }
-
-      await editor.value?.addNode(newNode)
-      await area.value?.translate(newNode.id, node.position)
-    }),
-  )
-
-  // iterate each connection and create respective nodes' conenection
-  // should be wrapped in `Promise.allSettled` since
-  // `editor.addConnection` is asynchronous
-  await Promise.allSettled(
-    content.connections.map(async (connection) => {
-      const sourceNode = editor.value?.getNode(connection.source)
-      if (!sourceNode) throw new Error('no sourceNode')
-
-      const targetNode = editor.value?.getNode(connection.target)
-      if (!targetNode) throw new Error('no targetNode')
-
-      await editor.value?.addConnection(
-        new ClassicPreset.Connection(
-          sourceNode,
-          connection.sourceOutput,
-          targetNode,
-          connection.targetInput,
-        ),
-      )
-    }),
-  )
+  // // clear canvas' nodes
+  // editor.value?.clear()
+  // // get file from `input:file`
+  // const inputElement = event.target as HTMLInputElement
+  // const file = inputElement.files?.item(0)
+  // if (!file) throw new Error('no file selected')
+  // // reset `<input />` value
+  // inputElement.value = ''
+  // // get and parse content to JSON
+  // const content = JSON.parse(await file.text())
+  // // iterate each node and its respective details
+  // // and add node into canvas
+  // // should be wrapped in `Promise.allSettled` since
+  // // `editor.addNode` is asynchronous
+  // await Promise.allSettled(
+  //   content.nodes.map(async (node) => {
+  //     const newNode = new ClassicPreset.Node(node.label)
+  //     newNode.id = node.id
+  //     // iterate through node's input sockets and create accordingly
+  //     for (const input in node.inputs) {
+  //       newNode.addInput(input, new ClassicPreset.Input(socket))
+  //     }
+  //     // iterate through node's output sockets and create accordingly
+  //     for (const output in node.outputs) {
+  //       newNode.addOutput(output, new ClassicPreset.Output(socket))
+  //     }
+  //     await editor.value?.addNode(newNode)
+  //     await area.value?.translate(newNode.id, node.position)
+  //   }),
+  // )
+  // // iterate each connection and create respective nodes' conenection
+  // // should be wrapped in `Promise.allSettled` since
+  // // `editor.addConnection` is asynchronous
+  // await Promise.allSettled(
+  //   content.connections.map(async (connection) => {
+  //     const sourceNode = editor.value?.getNode(connection.source)
+  //     if (!sourceNode) throw new Error('no sourceNode')
+  //     const targetNode = editor.value?.getNode(connection.target)
+  //     if (!targetNode) throw new Error('no targetNode')
+  //     await editor.value?.addConnection(
+  //       new ClassicPreset.Connection(
+  //         sourceNode,
+  //         connection.sourceOutput,
+  //         targetNode,
+  //         connection.targetInput,
+  //       ),
+  //     )
+  //   }),
+  // )
 }
 </script>
 
@@ -214,10 +204,10 @@ async function handleUploadData(event: Event) {
         <h2 class="font-medium">`area`</h2>
         <pre class="text-xs">{{ area }}</pre>
       </section>
-      <section class="col-span-full flex flex-wrap items-start gap-4">
+      <section class="col-span-full flex flex-wrap items-center gap-4">
         <Button type="button" @click="handleClearNodes">clear nodes</Button>
         <Button type="button" @click="handleSaveNodes">save nodes</Button>
-        <input type="file" @change="handleUploadData" />
+        <input type="file" @change="handleUploadData" disabled />
       </section>
     </div>
   </main>

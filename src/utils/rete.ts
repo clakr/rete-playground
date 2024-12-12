@@ -14,7 +14,7 @@ export class TextNode extends ClassicPreset.Node {
   constructor() {
     super('text')
 
-    this.addInput('input', new ClassicPreset.Input(socket, 'From Step / Triggers'))
+    this.addInput('input', new ClassicPreset.Input(socket, 'From Step / Triggers', true))
     this.addOutput('output', new ClassicPreset.Output(socket, 'Continue to Next Step'))
     this.addControl(
       'control',

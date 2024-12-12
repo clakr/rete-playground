@@ -11,7 +11,7 @@ defineProps<{ data: any }>()
   https://retejs.org/docs/faq#prevent-node-movement-on-control
   -->
   <textarea
-    class="w-full rounded border p-2 [[data-selected=true]_&]:text-slate-950"
+    class="w-full resize-none rounded bg-slate-200 p-4"
     @pointerdown.stop=""
     @dblclick.stop=""
     :value="data.value"

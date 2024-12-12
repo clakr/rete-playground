@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Schemes } from '../../App.vue'
 import { sortByIndex } from '../../utils'
+import NodeCard from '../node-card.vue'
+import NodeLabel from '../node-label.vue'
 import { Icon } from '@iconify/vue'
 import { Ref } from 'rete-vue-plugin'
 import { computed } from 'vue'
@@ -12,17 +14,13 @@ const outputs = computed(() => sortByIndex(Object.entries(props.data.outputs)))
 </script>
 
 <template>
-  <article
-    class="relative flex aspect-video w-64 flex-col justify-between rounded-lg border bg-slate-50 text-sm hover:bg-slate-300 data-[selected=true]:bg-slate-600 data-[selected=true]:text-slate-50"
-    :data-selected="data.selected"
-    data-testid="node"
-  >
-    <div class="grid place-content-center py-8">
+  <NodeCard :data-selected="data.selected" data-testid="node" class="w-72">
+    <section class="grid place-content-center py-8">
       <Icon icon="formkit:start" class="size-20" />
-    </div>
+    </section>
 
     <!-- outputs -->
-    <section class="border-t py-2 text-xs font-medium">
+    <section class="border-t border-slate-300 py-2 text-xs font-medium">
       <template v-for="[key, output] in outputs" :key="key + seed">
         <div
           v-if="output"
@@ -36,18 +34,15 @@ const outputs = computed(() => sortByIndex(Object.entries(props.data.outputs)))
             :emit
             :data="{ type: 'socket', side: 'output', key, nodeId: data.id, payload: output.socket }"
             data-testid="output-socket"
-            class="-mx-4 [&>div[title=socket]]:bg-slate-700"
+            class="-mx-[calc(var(--socket-size)/2)] [&>div[title=socket]]:z-50 [&>div[title=socket]]:bg-slate-700"
           />
         </div>
       </template>
     </section>
 
-    <!-- node label -->
-    <div
-      class="absolute inset-x-0 top-[calc(100%+1rem)] flex items-center justify-center gap-x-2 font-semibold capitalize [[data-selected=true]_&]:text-slate-950"
-    >
+    <NodeLabel>
       <Icon icon="formkit:start" />
       {{ data.label }}
-    </div>
-  </article>
+    </NodeLabel>
+  </NodeCard>
 </template>
